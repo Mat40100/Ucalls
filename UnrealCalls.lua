@@ -21,7 +21,8 @@ local SoundsKill = {
 Options ={
 	Calls = true,
 	Creature = true,
-	Player = true
+	Player = true,
+	CallTimer = 13
 }
 
 local killCounter = 0
@@ -62,7 +63,7 @@ function Uclass:Timer()
 	if rowCounter > 0 then
 		TimerCounter = TimerCounter + 1
 	end
-	if TimerCounter > 13 then
+	if TimerCounter > Options["CallTimer"] then
 		Uclass:TimerReset()
 		Uclass:RowCounterReset()
 	end
@@ -118,11 +119,11 @@ function Uclass:ThrowOptions()
 	end
 	print("================")
 end
-function getOption(option)
+function Uclass:getOption(option)
 	return Options[option]
 end
 
-function setOption(option)
+function Uclass:setOption(option)
 	if Options[option] then
 		Options[option] = false
 	else
@@ -131,16 +132,25 @@ function setOption(option)
 	print(option, Options[option])
 end
 
+function Uclass:ChangeTimer(timer)
+	timer = math.floor(timer)
+	Options["CallTimer"] = timer
+	print("CallTimer is now "..Options["CallTimer"])
+end
+
 function Uclass:ChangeOption(option)
-local exists = false
-	for k,v in pairs(Options) do
-		if k == option then
+	local exists = false
+	if option == "CallTimer" then
+	else
+		for k,v in pairs(Options) do
+			if k == option then
 			exists = true
+			end
 		end
 	end
 	if exists == true then
 		--print("Existe")
-		setOption(option)
+		Uclass:setOption(option)
 		return true
 	elseif exists == false then
 		return false
