@@ -1,14 +1,12 @@
 Uclass = {}
 
-
-
 local SoundsRow = {
 	"firstblood",
 	"doublekill",
 	"multikill",
 	"megakill",
 	"ultrakill",
-	"monsterkill"	
+	"monsterkill"
 }
 local SoundsKill = {
 	killingspree = 5,
@@ -18,13 +16,6 @@ local SoundsKill = {
 	godlike = 30
 }
 
-Options ={
-	Calls = true,
-	Creature = true,
-	Player = true,
-	CallTimer = 13
-}
-
 local killCounter = 0
 local rowCounter = 0
 local TimerCounter = 0
@@ -32,9 +23,9 @@ local TimerRow = 0
 
 
 function Uclass:Call(sourceName, destType)
-	--print("Call ok")
+	Debug("Uclass","Call function called",true)--print("Call ok")
 	if Uclass:VarTest(sourceName, destType) then
-	--print("Var test ok")
+		Debug("Uclass","VarTest passed",true)
 		Uclass:KillCounterInc()
 		Uclass:RowCounterInc()
 		Uclass:TimerReset()
@@ -44,14 +35,14 @@ end
 
 function Uclass:VarTest(sourceName, destType)
 	if sourceName == playerName then
-	--print("playerName ok")
+		Debug("Uclass","playerName test",true)
 		for k,v in pairs(Options) do
-		--print(k..(" test"))
+		Debug("Uclass","Call function called",true)
 			if (string.find(destType, k) ~= nil) and Options[k] == true then
-				--print("test ok")
+				Debug("Uclass","Killed type",Options[k])
 				return true
 			else
-				--print("test false")
+				Debug("Uclass","Killed type",false)
 			end
 		end
 	else
@@ -114,7 +105,7 @@ end
 
 function Uclass:ThrowOptions()
 	print("==== Options =====")
-	for k,v in pairs(Options) do 
+	for k,v in pairs(Options) do
 		print(k,Options[k])
 	end
 	print("================")
@@ -149,7 +140,7 @@ function Uclass:ChangeOption(option)
 		end
 	end
 	if exists == true then
-		--print("Existe")
+		Debug("Uclass","Option exist",true)
 		Uclass:setOption(option)
 		return true
 	elseif exists == false then
