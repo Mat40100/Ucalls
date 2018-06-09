@@ -1,6 +1,6 @@
 local PlayerEventHandlers = {}
 local CombatLogHandlers = {}
-local StatutFrame = CreateFrame("Frame")
+local PlayerFrame = CreateFrame("Frame")
 local CombatFrame = CreateFrame("Frame")
 local RefreshFrame = CreateFrame("Frame")
 
@@ -87,6 +87,10 @@ end
 
 CombatFrame : SetScript ("OnEvent", function ( self , event , ...)
 	CombatLogHandlers [ event ](...)
+end)
+
+PlayerFrame : SetScript ("OnEvent", function ( self , event , ...)
+	PlayerEventHandlers [ event ](...)
 end)
 
 RefreshFrame:SetScript("OnUpdate",function (self, elapsed)
