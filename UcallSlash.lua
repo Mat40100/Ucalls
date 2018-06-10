@@ -2,9 +2,9 @@ SLASH_BOOLCALL1 = "/Calls"
 SLASH_CALLTIMER1 = "/CallTimer"
 
 SlashCmdList["BOOLCALL"] = function(msg)
-	if Uclass:ChangeOption(msg) == false then
+	if ChangeOption(msg) == false then
 		if msg == "opt" then
-			Uclass:ThrowOptions()
+			ThrowOptions()
 		else
 			print("Cette option n'existe pas")
 		end
@@ -12,5 +12,5 @@ SlashCmdList["BOOLCALL"] = function(msg)
 end
 
 SlashCmdList["CALLTIMER"] = function(msg)
-	Uclass:ChangeTimer(msg)
+	ChangeTimer(msg)
 end

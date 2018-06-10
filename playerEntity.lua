@@ -16,6 +16,7 @@ end
 
 function PlayerEntity:UpdateEntity(parsedEvent)
   if  parsedEvent["type"] == "RANGE_DAMAGE" or
+      parsedEvent["type"] == "SWING_DAMAGE" or
       parsedEvent["type"] == "SPELL_DAMAGE" or
       parsedEvent["type"] == "SPELL_PERIODIC" then
         self:DAMAGE(parsedEvent)
