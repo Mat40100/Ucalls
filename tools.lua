@@ -90,12 +90,26 @@ function ChangeTimer(timer)
 	print("CallTimer is now "..Options["CallTimer"])
 end
 
+function ChangeDebugger(string){
+  if type(string) == "string" then
+    if tContains(Modules,string) then
+      Options["Debug"] = string
+      return true
+    else
+      return false
+    end
+  else
+    return false
+  end
+end
+}
+
 function ChangeOption(option)
   -- Check first if someone is tryng to change CallTimer via this way --
   Debug("Tools","Change option is called ", true)
 
 	local exists = false
-	if option == "CallTimer" then
+	if option == "CallTimer" or option == "Debug" then
 	else
 		for k,v in pairs(Options) do
 			if k == option then

@@ -12,7 +12,14 @@ Options ={
 	Creature = true,
 	Player = true,
 	CallTimer = 13,
-	Debug = true
+	Debug = "All",
+	DpsMeter = true
+}
+
+Modules = {
+	"Tools",
+	"PlayerEntity",
+	"Uclass"
 }
 
 function CombatLogHandlers.PLAYER_ENTERING_WORLD(...)
@@ -47,7 +54,7 @@ function CombatLogHandlers.COMBAT_LOG_EVENT_UNFILTERED(...)
 		Uclass:Call(sourceName,destType)
 	end
 
-	if tContains(PlayersArray,sourceName) then
+	if tContains(PlayersArray,sourceName) and Options["DpsMeter"] == true then
 		PlayerEntity[sourceName]:UpdateEntity(parsedEvent)
 	end
 end
