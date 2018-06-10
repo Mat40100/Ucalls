@@ -36,16 +36,20 @@ end
 function Uclass:VarTest(sourceName, destType)
 	if sourceName == playerName then
 		Debug("Uclass","playerName test",true)
+
 		for k,v in pairs(Options) do
 		Debug("Uclass","Call function called",true)
+			-- Chack 1 by 1 options with type to see if it must call --
 			if (string.find(destType, k) ~= nil) and Options[k] == true then
 				Debug("Uclass","Killed type",Options[k])
 				return true
 			else
 				Debug("Uclass","Killed type",false)
 			end
+
 		end
 	else
+		Debug("Uclass","playerName test",false)
 		return false
 	end
 end
@@ -66,27 +70,27 @@ end
 
 function Uclass:KillCounterInc()
 	killCounter = killCounter + 1
-	--Kills:SetText("Kills : "..killCounter)
+	Debug("Uclass","Killcounter",killCounter)
 	if killCounter > 30 then
 		Uclass:KillCounterReset()
+		Debug("Uclass","Counter reset",true)
 	end
 end
 
 function Uclass:KillCounterReset()
 	--print("Counter has restarted")
 	killCounter = 0
-	--Kills:SetText("Kills : "..killCounter)
+	Debug("Uclass","counter has been reset",killCounter)
 end
 
 function Uclass:RowCounterReset()
 	rowCounter = 0
-	--Row:SetText("Row : "..rowCounter)
-	--print("rowCounter :"..rowCounter)
+	Debug("Uclass","Row counter reset",rowCounter)
 end
 
 function Uclass:RowCounterInc()
 	rowCounter = rowCounter + 1
-	--Row:SetText("Row : "..rowCounter)
+	Debug("Uclass","row counter increase",rowCounter)
 end
 
 function Uclass:SoundParser()

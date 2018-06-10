@@ -1,4 +1,6 @@
 function Debug(module, name, varToTest)
+  --[[ this tool allow player to debug module by module or all at the same time,
+  the goal is not to flood chat ]]
   local IsDebugActive= false
   if Options["Debug"] == "all" then
     IsDebugActive == true
@@ -18,13 +20,9 @@ function CombatEventParser(...)
   EventParsed["type"] = select(2,...)
   EventParsed["sourceName"] = select(5,...)
   EventParsed["destType"] = select(8,...)
-  if  EventParsed["type"] == "RANGE_DAMAGE" or
-      EventParsed["type"] == "SPELL_DAMAGE" or
-      EventParsed["type"] == "SPELL_PERIODIC" then
-        -- I HAVE TO ADD SWING DAMAGE WHEN I GET INTERNET--
-    EventParsed["spellId"] = select(12,...)
-    EventParsed["spellName"] = select(13,...)
-    EventParsed["spellSchool"] = select(14,...)
+
+  if strfind(EventParsed["type"],"DAMAGE") ~= nil then
+    -- IF it's DAMAGE after type we hydrate with damage only var --
     EventParsed["amount"] = select(15,...)
     EventParsed["overkill"] = select(16,...)
     EventParsed["school"] = select(17,...)
@@ -35,10 +33,24 @@ function CombatEventParser(...)
     EventParsed["glancing"] = select(21,...)
     EventParsed["crushing"] = select(22,...)
     EventParsed["isOffHand"] = select(23,...)
+  elseif strfind(EventParsed["type"],"HEAL") ~= nil then
+    -- IF it's HEAL after type we hydrate with heal only var --
+    EventParsed["amount"] = select(15,...)
+    EventParsed["overhealing"] = select(16,...)
+    EventParsed["absorbed"] = select(17,...)
+    EventParsed["critical"] = select(18,...)
+  end
+
+  if strfind(EventParsed["type"],"SWING") == nil then
+    -- to BE sure to not hydrate var which not exists--
+    EventParsed["spellId"] = select(12,...)
+    EventParsed["spellName"] = select(13,...)
+    EventParsed["spellSchool"] = select(14,...)
   end
 
   return EventParsed
 end
+
 -- OPTION FUNCTIONS --
 function ThrowOptions()
 	print("==== Options =====")
@@ -49,6 +61,7 @@ function ThrowOptions()
 end
 
 function setOption(option)
+  -- Invert the option thrown in this function --
 	if Options[option] then
 		Options[option] = false
 	else
@@ -58,12 +71,16 @@ function setOption(option)
 end
 
 function ChangeTimer(timer)
+  --[[ we check that timer arg is a number,
+   in that way players can't send wrong var ]]
+
 	timer = math.floor(timer)
 	Options["CallTimer"] = timer
 	print("CallTimer is now "..Options["CallTimer"])
 end
 
 function ChangeOption(option)
+  -- Check first if someone is tryng to change CallTimer via this way --
 	local exists = false
 	if option == "CallTimer" then
 	else
