@@ -2,27 +2,35 @@ function Debug(module, name, varToTest)
   --[[ this tool allow player to debug module by module or all at the same time,
   the goal is not to flood chat ]]
   local IsDebugActive= false
+
   if Options["Debug"] == "all" then
     IsDebugActive == true
   elseif Options["Debug"] == "module" then
     IsDebugActive == true
   end
+
   if IsDebugActive == true then
+    -- check BTW if varToTest is function to iterate table --
     print("Debug Mod var:",name)
-    print("Value :",varToTest)
+    if type(varToTest) == "function" then
+        varToTest()
+      elseif(type(varToTest) == "string") then
+        print(varToTest)
+      end
   end
 end
 
 --Usefull function to parse the Combat log event--
 function CombatEventParser(...)
   local EventParsed ={}
-
+  Debug("Tools","Parser is called :", true)
   EventParsed["type"] = select(2,...)
   EventParsed["sourceName"] = select(5,...)
   EventParsed["destType"] = select(8,...)
 
   if strfind(EventParsed["type"],"DAMAGE") ~= nil then
     -- IF it's DAMAGE after type we hydrate with damage only var --
+    Debug("Tools","Parser recognise DAMAGE type :", true)
     EventParsed["amount"] = select(15,...)
     EventParsed["overkill"] = select(16,...)
     EventParsed["school"] = select(17,...)
@@ -35,6 +43,7 @@ function CombatEventParser(...)
     EventParsed["isOffHand"] = select(23,...)
   elseif strfind(EventParsed["type"],"HEAL") ~= nil then
     -- IF it's HEAL after type we hydrate with heal only var --
+    Debug("Tools","Parser recognise HEAL type :", true)
     EventParsed["amount"] = select(15,...)
     EventParsed["overhealing"] = select(16,...)
     EventParsed["absorbed"] = select(17,...)
@@ -43,6 +52,7 @@ function CombatEventParser(...)
 
   if strfind(EventParsed["type"],"SWING") == nil then
     -- to BE sure to not hydrate var which not exists--
+    Debug("Tools","Parser recognise SWING type :", true)
     EventParsed["spellId"] = select(12,...)
     EventParsed["spellName"] = select(13,...)
     EventParsed["spellSchool"] = select(14,...)
@@ -73,6 +83,7 @@ end
 function ChangeTimer(timer)
   --[[ we check that timer arg is a number,
    in that way players can't send wrong var ]]
+   Debug("Tools","Change timer is called :", true)
 
 	timer = math.floor(timer)
 	Options["CallTimer"] = timer
@@ -81,6 +92,8 @@ end
 
 function ChangeOption(option)
   -- Check first if someone is tryng to change CallTimer via this way --
+  Debug("Tools","Change option is called ", true)
+
 	local exists = false
 	if option == "CallTimer" then
 	else
@@ -91,7 +104,7 @@ function ChangeOption(option)
 		end
 	end
 	if exists == true then
-		Debug("Uclass","Option exist",true)
+		Debug("Tools","Option exist",true)
 	  setOption(option)
 		return true
 	elseif exists == false then

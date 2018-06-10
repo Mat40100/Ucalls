@@ -4,7 +4,7 @@ local PlayerFrame = CreateFrame("Frame")
 local CombatFrame = CreateFrame("Frame")
 local RefreshFrame = CreateFrame("Frame")
 
-local RefreshTime = 1
+local RefreshTime = 1 -- in second, it's the frameRate of the addon--
 local Delta = 0
 
 Options ={

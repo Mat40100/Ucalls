@@ -15,28 +15,12 @@ function PlayerEntity:NewEntity(name)
 end
 
 function PlayerEntity:UpdateEntity(parsedEvent)
-  if  parsedEvent["type"] == "RANGE_DAMAGE" or
-      parsedEvent["type"] == "SWING_DAMAGE" or
-      parsedEvent["type"] == "SPELL_DAMAGE" or
-      parsedEvent["type"] == "SPELL_PERIODIC" then
+  if  strfind(parsedEvent["type"],"DAMAGE") ~= nil then
         self:DAMAGE(parsedEvent)
   end
-  --[[
-  parsedEvent["sourceName"]
-  parsedEvent["destType"]
-  EventParsed["spellId"]
-  EventParsed["spellName"]
-  EventParsed["spellSchool"]
-  EventParsed["amount"]
-  EventParsed["overkill"]
-  EventParsed["school"]
-  EventParsed["resisted"]
-  EventParsed["blocked"]
-  EventParsed["absorbed"]
-  EventParsed["critical"]
-  EventParsed["glancing"]
-  EventParsed["crushing"]
-  EventParsed["isOffHand"]]
+  if  strfind(parsedEvent["type"],"HEAL") ~= nil then
+        self:HEAL(parsedEvent)
+  end
 end
 
 function PlayerEntity:DAMAGE(parsedEvent)
@@ -44,3 +28,25 @@ function PlayerEntity:DAMAGE(parsedEvent)
 
   Debug("PlayerEntity","Damage update",self["dmg"])
 end
+
+function PlayerEntity:HEAL(parsedEvent)
+  self["Heal"] = self["Heal"] + parsedEvent["amount"]
+
+  Debug("PlayerEntity","Heal update",self["Heal"])
+end
+--[[
+parsedEvent["sourceName"]
+parsedEvent["destType"]
+EventParsed["spellId"]
+EventParsed["spellName"]
+EventParsed["spellSchool"]
+EventParsed["amount"]
+EventParsed["overkill"]
+EventParsed["school"]
+EventParsed["resisted"]
+EventParsed["blocked"]
+EventParsed["absorbed"]
+EventParsed["critical"]
+EventParsed["glancing"]
+EventParsed["crushing"]
+EventParsed["isOffHand"]]
