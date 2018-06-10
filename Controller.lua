@@ -19,7 +19,8 @@ Options ={
 Modules = {
 	"Tools",
 	"PlayerEntity",
-	"Uclass"
+	"Uclass",
+	"All"
 }
 
 function CombatLogHandlers.PLAYER_ENTERING_WORLD(...)
