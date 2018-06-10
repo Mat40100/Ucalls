@@ -21,7 +21,7 @@ function CombatEventParser(...)
   if  EventParsed["type"] == "RANGE_DAMAGE" or
       EventParsed["type"] == "SPELL_DAMAGE" or
       EventParsed["type"] == "SPELL_PERIODIC" then
-
+        -- I HAVE TO ADD SWING DAMAGE WHEN I GET INTERNET--
     EventParsed["spellId"] = select(12,...)
     EventParsed["spellName"] = select(13,...)
     EventParsed["spellSchool"] = select(14,...)
@@ -38,4 +38,46 @@ function CombatEventParser(...)
   end
 
   return EventParsed
+end
+-- OPTION FUNCTIONS --
+function ThrowOptions()
+	print("==== Options =====")
+	for k,v in pairs(Options) do
+		print(k,Options[k])
+	end
+	print("================")
+end
+
+function setOption(option)
+	if Options[option] then
+		Options[option] = false
+	else
+		Options[option] = true
+	end
+	print(option, Options[option])
+end
+
+function ChangeTimer(timer)
+	timer = math.floor(timer)
+	Options["CallTimer"] = timer
+	print("CallTimer is now "..Options["CallTimer"])
+end
+
+function ChangeOption(option)
+	local exists = false
+	if option == "CallTimer" then
+	else
+		for k,v in pairs(Options) do
+			if k == option then
+			exists = true
+			end
+		end
+	end
+	if exists == true then
+		Debug("Uclass","Option exist",true)
+	  setOption(option)
+		return true
+	elseif exists == false then
+		return false
+	end
 end
