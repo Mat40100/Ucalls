@@ -12,6 +12,8 @@ function PlayerEntity:new(name,...)
    return self;
 end
 
-function PlayerEntity:DAMAGE(a)
-  self.Dmg  = self.Dmg + a
+function PlayerEntity:DAMAGE(eventParsed)
+  setmetatable(self, PlayerEntity);
+  Debug("Entity","Is Damage",eventParsed["amount"])
+  self.Dmg = self.Dmg + eventParsed["amount"]
 end

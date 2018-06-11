@@ -58,12 +58,13 @@ function CombatLogHandlers.COMBAT_LOG_EVENT_UNFILTERED(...)
 		Debug("Uclass","Party_kill event",true)
 		Uclass:Call(eventParsed)
 	end
-
+	--if eventParsed["sourceName"] == "Xper" and (strfind(eventParsed["type"],"DAMAGE") ~= nil) then print(eventParsed["spellName"],eventParsed["amount"]) end
 	if setContains(PlayersArray,eventParsed["sourceName"]) then
-		Debug("Entity","Event detected",eventParsed["sourceName"])
-		PlayersArray[eventParsed["sourceName"]]:DAMAGE(eventParsed["amount"])
+		Debug("Controller","Event detected",eventParsed["sourceName"])
+		if strfind(eventParsed["type"],"DAMAGE") then
+			PlayersArray[eventParsed["sourceName"]]:DAMAGE(eventParsed)
+		end
 	end
-
 end
 
 function OnUpdate(elapsed)
