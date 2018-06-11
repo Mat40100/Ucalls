@@ -6,4 +6,5 @@ tools.lua
 UcallSlash.lua
 UnrealCalls.lua
 PlayerEntity.lua
+FrameController.lua
 Controller.lua

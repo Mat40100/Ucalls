@@ -15,6 +15,9 @@ local RefreshFrame = CreateFrame("Frame")
 		Debug = "Parser"
 	}
 	petName = nil
+
+	MyAddon = nil
+
 	Modules ={
 		"all",
 		"none",
@@ -32,6 +35,8 @@ local RefreshFrame = CreateFrame("Frame")
 function PlayerLogHandlers:PLAYER_ENTERING_WORLD(...)
 	playerName = UnitName("player")
 	ResetGroupVar()
+	LoadMainFrame()
+	CreatePlayerFrame(playerName)
 	Debug("Entity","player's table",PlayersArray)
 end
 

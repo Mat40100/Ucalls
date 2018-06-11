@@ -16,7 +16,7 @@ local SoundsKill = {
 	godlike = 30
 }
 
-local killCounter = 0
+killCounter = 0
 local rowCounter = 0
 local TimerCounter = 0
 local TimerRow = 0
@@ -60,6 +60,8 @@ end
 
 function Uclass:KillCounterInc()
 	killCounter = killCounter + 1
+	offset = killCounter*22
+	InnerFrame:SetWidth(offset)
 	--Kills:SetText("Kills : "..killCounter)
 	if killCounter > 30 then
 		Uclass:KillCounterReset()
