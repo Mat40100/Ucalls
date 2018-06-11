@@ -14,7 +14,7 @@ local RefreshFrame = CreateFrame("Frame")
 		CallTimer = 13,
 		Debug = "Parser"
 	}
-
+	petName = nil
 	Modules ={
 		"all",
 		"none",
@@ -23,17 +23,16 @@ local RefreshFrame = CreateFrame("Frame")
 		"Tools",
 		"Uclass",
 		"EventParser",
-		"Entity"
+		"Entity",
+		"Dpsmeter"
 	}
 
 	PlayersArray ={}
 
 function PlayerLogHandlers:PLAYER_ENTERING_WORLD(...)
 	playerName = UnitName("player")
-	petName = UnitName("pet")
 	ResetGroupVar()
 	Debug("Entity","player's table",PlayersArray)
-
 end
 
 function PlayerLogHandlers:PLAYER_REGEN_DISABLED(...)
@@ -46,7 +45,7 @@ function PlayerLogHandlers:PLAYER_REGEN_ENABLED(...)
 	--Combat End--
 	Debug("Controller","Combat","End")
 	for k,v in pairs(PlayersArray) do
-		Debug("Entity",PlayersArray[k].Name,PlayersArray[k].Dmg)
+		Debug("Dpsmeter",PlayersArray[k].Name,PlayersArray[k].Dmg)
 	end
 	ResetGroupVar()
 end

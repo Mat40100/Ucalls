@@ -30,12 +30,23 @@ function setContains(set, key)
 end
 
 function ResetGroupVar()
+  local hasUI, isHunterPet = HasPetUI();
   PlayersInGroup = GetHomePartyInfo()
   wipe(PlayersArray)
   PlayersArray ={
-    [playerName] = PlayerEntity:new(playerName,UnitClass(playerName)),
-    [petName] = PlayerEntity:new(petName,UnitClass(petName))
+    [playerName] = PlayerEntity:new(playerName,UnitClass(playerName))
   }
+  if HasPetSpells(UnitName("pet")) ~= nil then
+    petName = UnitName("pet")
+    PlayersArray ={
+      [playerName] = PlayerEntity:new(playerName,UnitClass(playerName)),
+      [petName] = PlayerEntity:new(petName,"Pet")
+    }
+  else
+    PlayersArray ={
+      [playerName] = PlayerEntity:new(playerName,UnitClass(playerName))
+    }
+  end
   if PlayersInGroup ~= nil then
     for k,v in pairs(PlayersInGroup) do
       print(k,v)
