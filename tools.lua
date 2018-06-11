@@ -4,64 +4,104 @@ function Debug(module, name, varToTest)
   local IsDebugActive= false
 
   if Options["Debug"] == "all" then
-    IsDebugActive == true
-  elseif Options["Debug"] == "module" then
-    IsDebugActive == true
+    IsDebugActive = true
+  end
+
+  if Options["Debug"] == module then
+    IsDebugActive = true
   end
 
   if IsDebugActive == true then
     -- check BTW if varToTest is function to iterate table --
-    print("Debug Mod var:",name)
-    if type(varToTest) == "function" then
-        varToTest()
-      elseif(type(varToTest) == "string") then
-        print(varToTest)
+    print("Debug Mod:",name)
+    if(type(varToTest) == "table") then
+      for k,v in pairs(varToTest) do
+        print("__",k,v)
       end
+    else
+        print("var :",varToTest)
+    end
+
+  end
+end
+
+function setContains(set, key)
+    return set[key] ~= nil
+end
+
+function ResetGroupVar()
+  PlayersInGroup = GetHomePartyInfo()
+  wipe(PlayersArray)
+  PlayersArray ={
+    [playerName] = PlayerEntity:new(playerName,UnitClass(playerName)),
+    [petName] = PlayerEntity:new(petName,UnitClass(petName))
+  }
+  if PlayersInGroup ~= nil then
+    for k,v in pairs(PlayersInGroup) do
+      print(k,v)
+      table.insert(PlayersArray,PlayerEntity:new(v,UnitClass(v)))
+    end
   end
 end
 
 --Usefull function to parse the Combat log event--
 function CombatEventParser(...)
   local EventParsed ={}
-  Debug("Tools","Parser is called :", true)
+  Debug("EventParser","Parser", true)
+
+
   EventParsed["type"] = select(2,...)
   EventParsed["sourceName"] = select(5,...)
   EventParsed["destType"] = select(8,...)
 
-  if strfind(EventParsed["type"],"DAMAGE") ~= nil then
+  if strfind(EventParsed["type"],"SWING") == nil then
+    -- to BE sure to not hydrate var which not exists--
+    Debug("EventParser","SPELL type :", false)
+    EventParsed["spellId"] = select(12,...)
+    EventParsed["spellName"] = select(13,...)
+    EventParsed["spellSchool"] = select(14,...)
+  end
+
+  if strfind(EventParsed["type"],"SWING") ~= nil then
+    -- to BE sure to not hydrate var which not exists--
+    Debug("EventParser","SWING type :", true)
+    EventParsed["amount"] = select(12,...)
+    EventParsed["overkill"] = select(13,...)
+    EventParsed["school"] = select(14,...)
+    EventParsed["resisted"] = select(15,...)
+    EventParsed["blocked"] = select(16,...)
+    EventParsed["absorbed"] = select(17,...)
+    EventParsed["critical"] = select(18,...)
+    EventParsed["glancing"] = select(19,...)
+    EventParsed["crushing"] = select(20,...)
+    EventParsed["isOffHand"] = select(21 ,...)
+  end
+
+  if(strfind(EventParsed["type"],"DAMAGE") ~= nil)and(strfind(EventParsed["type"],"SWING") == nil) then
     -- IF it's DAMAGE after type we hydrate with damage only var --
-    Debug("Tools","Parser recognise DAMAGE type :", true)
+    Debug("EventParser","DAMAGE type :", true)
     EventParsed["amount"] = select(15,...)
     EventParsed["overkill"] = select(16,...)
     EventParsed["school"] = select(17,...)
     EventParsed["resisted"] = select(18,...)
-    EventParsed["blocked"] = select(18,...)
-    EventParsed["absorbed"] = select(19,...)
-    EventParsed["critical"] = select(20,...)
-    EventParsed["glancing"] = select(21,...)
-    EventParsed["crushing"] = select(22,...)
-    EventParsed["isOffHand"] = select(23,...)
+    EventParsed["blocked"] = select(19,...)
+    EventParsed["absorbed"] = select(20,...)
+    EventParsed["critical"] = select(21,...)
+    EventParsed["glancing"] = select(22,...)
+    EventParsed["crushing"] = select(23,...)
+    EventParsed["isOffHand"] = select(24,...)
   elseif strfind(EventParsed["type"],"HEAL") ~= nil then
     -- IF it's HEAL after type we hydrate with heal only var --
-    Debug("Tools","Parser recognise HEAL type :", true)
+    Debug("EventParser","HEAL type :", true)
     EventParsed["amount"] = select(15,...)
     EventParsed["overhealing"] = select(16,...)
     EventParsed["absorbed"] = select(17,...)
     EventParsed["critical"] = select(18,...)
   end
 
-  if strfind(EventParsed["type"],"SWING") == nil then
-    -- to BE sure to not hydrate var which not exists--
-    Debug("Tools","Parser recognise SWING type :", true)
-    EventParsed["spellId"] = select(12,...)
-    EventParsed["spellName"] = select(13,...)
-    EventParsed["spellSchool"] = select(14,...)
-  end
-
   return EventParsed
 end
 
--- OPTION FUNCTIONS --
 function ThrowOptions()
 	print("==== Options =====")
 	for k,v in pairs(Options) do
@@ -79,30 +119,6 @@ function setOption(option)
 	end
 	print(option, Options[option])
 end
-
-function ChangeTimer(timer)
-  --[[ we check that timer arg is a number,
-   in that way players can't send wrong var ]]
-   Debug("Tools","Change timer is called :", true)
-
-	timer = math.floor(timer)
-	Options["CallTimer"] = timer
-	print("CallTimer is now "..Options["CallTimer"])
-end
-
-function ChangeDebugger(string){
-  if type(string) == "string" then
-    if tContains(Modules,string) then
-      Options["Debug"] = string
-      return true
-    else
-      return false
-    end
-  else
-    return false
-  end
-end
-}
 
 function ChangeOption(option)
   -- Check first if someone is tryng to change CallTimer via this way --
@@ -124,4 +140,17 @@ function ChangeOption(option)
 	elseif exists == false then
 		return false
 	end
+end
+
+function ChangeDebugger(string)
+  if type(string) == "string" then
+    if tContains(Modules,string) then
+      Options["Debug"] = string
+      return true
+    else
+      return false
+    end
+  else
+    return false
+  end
 end

@@ -1,87 +1,70 @@
-local PlayerEventHandlers = {}
 local CombatLogHandlers = {}
+local PlayerLogHandlers = {}
 local PlayerFrame = CreateFrame("Frame")
 local CombatFrame = CreateFrame("Frame")
 local RefreshFrame = CreateFrame("Frame")
 
-local RefreshTime = 1 -- in second, it's the frameRate of the addon--
-local Delta = 0
+	local RefreshTime = 1
+	local Delta = 0
 
-Options ={
-	Calls = true,
-	Creature = true,
-	Player = true,
-	CallTimer = 13,
-	Debug = "All",
-	DpsMeter = true
-}
-
-Modules = {
-	"Tools",
-	"PlayerEntity",
-	"Uclass",
-	"All"
-}
-
-function CombatLogHandlers.PLAYER_ENTERING_WORLD(...)
-	playerName = UnitName("player")
-	PlayersArray = {
-		[playerName] = PlayerEntity
+	Options ={
+		Calls = true,
+		Creature = true,
+		Player = true,
+		CallTimer = 13,
+		Debug = "Parser"
 	}
-	PlayersArray[playerName]:NewEntity(playerName)
 
-	Debug("Controller","Nom entité",function(
-		for k,v in pairs(PlayersArray[playerName]) do
-			print(k,v)
-		end
-	))
+	Modules ={
+		"all",
+		"none",
+		"Controller",
+		"Parser",
+		"Tools",
+		"Uclass",
+		"EventParser",
+		"Entity"
+	}
+
+	PlayersArray ={}
+
+function PlayerLogHandlers:PLAYER_ENTERING_WORLD(...)
+	playerName = UnitName("player")
+	petName = UnitName("pet")
+	ResetGroupVar()
+	Debug("Entity","player's table",PlayersArray)
+
+end
+
+function PlayerLogHandlers:PLAYER_REGEN_DISABLED(...)
+	--Combat Start--
+	Debug("Controller","Combat","Start")
+
+end
+
+function PlayerLogHandlers:PLAYER_REGEN_ENABLED(...)
+	--Combat End--
+	Debug("Controller","Combat","End")
+	for k,v in pairs(PlayersArray) do
+		Debug("Entity",PlayersArray[k].Name,PlayersArray[k].Dmg)
+	end
+	ResetGroupVar()
 end
 
 function CombatLogHandlers.COMBAT_LOG_EVENT_UNFILTERED(...)
-	local eventType = select(2, ...)
-	local sourceName = select(5,...)
-	local destType = select(8,...)
+	local eventParsed= CombatEventParser(...)
 
-	local parsedEvent = CombatEventParser(...)
-
-	Debug("Controller","Combat parser:", function(
-		for k,v in pairs(ParserTest) do
-			print(k,v)
-		end
-	))
-
-	if eventType == "PARTY_KILL" then
-		--if event is PARTY_KILL we call the Unreal class--
-		Uclass:Call(sourceName,destType)
+	if (eventParsed["type"] == "PARTY_KILL") and (eventParsed["sourceName"] == playerName) then
+		Debug("Uclass","Party_kill event",true)
+		Uclass:Call(eventParsed)
 	end
 
-	if tContains(PlayersArray,sourceName) and Options["DpsMeter"] == true then
-		PlayerEntity[sourceName]:UpdateEntity(parsedEvent)
+	if setContains(PlayersArray,eventParsed["sourceName"]) then
+		Debug("Entity","Event detected",eventParsed["sourceName"])
+		PlayersArray[eventParsed["sourceName"]]:DAMAGE(eventParsed["amount"])
 	end
-end
 
-function PlayerEventHandlers.PLAYER_REGEN_DISABLE(...)
-	--Combat Start--
-	--Register events to track when entering in combat --
-	for event , _ in pairs ( CombatLogHandlers ) do
-		CombatFrame : RegisterEvent ( event )
-	end
 end
-
-function PlayerEventHandlers.PLAYER_REGEN_ENABLE(...)
-	--Combat End--
-	-- Unregister events when leaving combat--
-	for event , _ in pairs ( CombatLogHandlers ) do
-		CombatFrame : UnregisterEvent ( event )
-	end
-	--After the code and sent to screen--
-	wipe(PlayersArray)
-end
-
-function PlayerEventHandlers.GROUP_ROSTER_UPDATE(...)
-	PlayersInGroup = GetHomePartyInfo()
-end
-
 
 function OnUpdate(elapsed)
 	Delta = Delta + elapsed
@@ -92,13 +75,20 @@ function OnUpdate(elapsed)
 end
 
 -- HANDLERS --
+for event , _ in pairs ( CombatLogHandlers ) do
+	CombatFrame : RegisterEvent ( event )
+end
+
+for event , _ in pairs ( PlayerLogHandlers ) do
+	PlayerFrame : RegisterEvent ( event )
+end
 
 CombatFrame : SetScript ("OnEvent", function ( self , event , ...)
 	CombatLogHandlers [ event ](...)
 end)
 
 PlayerFrame : SetScript ("OnEvent", function ( self , event , ...)
-	PlayerEventHandlers [ event ](...)
+	PlayerLogHandlers [ event ](...)
 end)
 
 RefreshFrame:SetScript("OnUpdate",function (self, elapsed)

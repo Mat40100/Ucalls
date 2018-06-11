@@ -22,10 +22,9 @@ local TimerCounter = 0
 local TimerRow = 0
 
 
-function Uclass:Call(sourceName, destType)
-	Debug("Uclass","Call function called",true)--print("Call ok")
-	if Uclass:VarTest(sourceName, destType) then
-		Debug("Uclass","VarTest passed",true)
+function Uclass:Call(eventParsed)
+	Debug("Uclass","Uclass called",eventParsed)
+	if Uclass:VarTest(eventParsed["sourceName"],eventParsed["destType"]) then
 		Uclass:KillCounterInc()
 		Uclass:RowCounterInc()
 		Uclass:TimerReset()
@@ -34,24 +33,15 @@ function Uclass:Call(sourceName, destType)
 end
 
 function Uclass:VarTest(sourceName, destType)
-	if sourceName == playerName then
-		Debug("Uclass","playerName test",true)
-
 		for k,v in pairs(Options) do
-		Debug("Uclass","Call function called",true)
-			-- Chack 1 by 1 options with type to see if it must call --
+		--print(k..(" test"))
 			if (string.find(destType, k) ~= nil) and Options[k] == true then
-				Debug("Uclass","Killed type",Options[k])
+				Debug("Uclass","VarTest",true)
 				return true
 			else
-				Debug("Uclass","Killed type",false)
+				Debug("Uclass",k,false)
 			end
-
 		end
-	else
-		Debug("Uclass","playerName test",false)
-		return false
-	end
 end
 
 function Uclass:Timer()
@@ -70,27 +60,27 @@ end
 
 function Uclass:KillCounterInc()
 	killCounter = killCounter + 1
-	Debug("Uclass","Killcounter",killCounter)
+	--Kills:SetText("Kills : "..killCounter)
 	if killCounter > 30 then
 		Uclass:KillCounterReset()
-		Debug("Uclass","Counter reset",true)
 	end
 end
 
 function Uclass:KillCounterReset()
 	--print("Counter has restarted")
 	killCounter = 0
-	Debug("Uclass","counter has been reset",killCounter)
+	--Kills:SetText("Kills : "..killCounter)
 end
 
 function Uclass:RowCounterReset()
 	rowCounter = 0
-	Debug("Uclass","Row counter reset",rowCounter)
+	--Row:SetText("Row : "..rowCounter)
+	--print("rowCounter :"..rowCounter)
 end
 
 function Uclass:RowCounterInc()
 	rowCounter = rowCounter + 1
-	Debug("Uclass","row counter increase",rowCounter)
+	--Row:SetText("Row : "..rowCounter)
 end
 
 function Uclass:SoundParser()
@@ -105,4 +95,10 @@ function Uclass:SoundParser()
 		PlaySoundFile("Interface\\AddOns\\Ucall\\Calls\\"..SoundsRow[rowCounter]..".ogg", "Master")
 	end
 	allreadyPlay = false
+end
+
+function Uclass:ChangeTimer(timer)
+	timer = math.floor(timer)
+	Options["CallTimer"] = timer
+	print("CallTimer is now "..Options["CallTimer"])
 end
