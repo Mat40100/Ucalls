@@ -6,6 +6,8 @@ local RefreshFrame = CreateFrame("Frame")
 
 	local RefreshTime = 1
 	local Delta = 0
+	local Group = {}
+	local GroupSize = 0
 
 	Options ={
 		Calls = true,
@@ -16,7 +18,9 @@ local RefreshFrame = CreateFrame("Frame")
 	}
 	petName = nil
 
-	MyAddon = nil
+	PlayerFrames = {
+
+	}
 
 	Modules ={
 		"all",
@@ -27,48 +31,66 @@ local RefreshFrame = CreateFrame("Frame")
 		"Uclass",
 		"EventParser",
 		"Entity",
-		"Dpsmeter"
+		"Dpsmeter",
+		"Ucall_Kills"
 	}
 
-	PlayersArray ={}
-
 function PlayerLogHandlers:PLAYER_ENTERING_WORLD(...)
+	local GroupSize = 0
+
 	playerName = UnitName("player")
-	ResetGroupVar()
-	LoadMainFrame()
-	CreatePlayerFrame(playerName)
-	Debug("Entity","player's table",PlayersArray)
+	--Send Message to guild to add him in array, and get return --
+
+
+	-- Add Player Array to Group array --
+	UcallGroup = getPlayersInGroup()
+
+	UcallGroup[playerName] = {
+		Ucall_Name="Ucall_"..playerName,
+		frame = nil
+	}
+
+	GroupSize = tablelength(UcallGroup)
+	Debug("Ucall_Kills","Group size",GroupSize)
+	Debug("Ucall_Kills","player's table",UcallGroup[playerName])
+
+	LoadMainFrame(GroupSize)
+	for k,v in pairs(UcallGroup) do
+		local f = CreatePlayerFrame(UcallGroup[k]["Ucall_Name"])
+		UcallGroup[k]["frame"] = f
+	end
+	FrameResize(Uclass:GetKillCounter(),playerName,UcallGroup)
+--	PlayerFrames[playerName]["frame"]:SetWidth(100)
 end
 
 function PlayerLogHandlers:PLAYER_REGEN_DISABLED(...)
 	--Combat Start--
 	Debug("Controller","Combat","Start")
-
 end
 
 function PlayerLogHandlers:PLAYER_REGEN_ENABLED(...)
 	--Combat End--
 	Debug("Controller","Combat","End")
-	for k,v in pairs(PlayersArray) do
-		Debug("Dpsmeter",PlayersArray[k].Name,PlayersArray[k].Dmg)
-	end
-	ResetGroupVar()
 end
 
 function CombatLogHandlers.COMBAT_LOG_EVENT_UNFILTERED(...)
 	local eventParsed= CombatEventParser(...)
+	local Ucall_Name = nil
+	local Counter = 0
 
 	if (eventParsed["type"] == "PARTY_KILL") and (eventParsed["sourceName"] == playerName) then
 		Debug("Uclass","Party_kill event",true)
 		Uclass:Call(eventParsed)
+		Counter = Uclass:GetKillCounter()
+		Debug("Ucall_Kills","Return Counter test",Counter)
+		FrameResize(Counter,playerName,UcallGroup)
 	end
-	--if eventParsed["sourceName"] == "Xper" and (strfind(eventParsed["type"],"DAMAGE") ~= nil) then print(eventParsed["spellName"],eventParsed["amount"]) end
-	if setContains(PlayersArray,eventParsed["sourceName"]) then
-		Debug("Controller","Event detected",eventParsed["sourceName"])
-		if strfind(eventParsed["type"],"DAMAGE") then
-			PlayersArray[eventParsed["sourceName"]]:DAMAGE(eventParsed)
-		end
-	end
+end
+
+function CombatLogHandlers.PLAYER_DEAD(...)
+	local Counter = 0
+	Uclass:PlayerDied()
+	FrameResize(0,playerName,UcallGroup)
 end
 
 function OnUpdate(elapsed)

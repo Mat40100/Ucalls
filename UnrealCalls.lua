@@ -16,15 +16,16 @@ local SoundsKill = {
 	godlike = 30
 }
 
-killCounter = 0
+local killCounter = 0
 local rowCounter = 0
 local TimerCounter = 0
 local TimerRow = 0
-
-
+function Uclass:GetKillCounter()
+	return killCounter
+end
 function Uclass:Call(eventParsed)
 	Debug("Uclass","Uclass called",eventParsed)
-	if Uclass:VarTest(eventParsed["sourceName"],eventParsed["destType"]) then
+	if Uclass:VarTest(eventParsed["destType"]) then
 		Uclass:KillCounterInc()
 		Uclass:RowCounterInc()
 		Uclass:TimerReset()
@@ -32,9 +33,8 @@ function Uclass:Call(eventParsed)
 	end
 end
 
-function Uclass:VarTest(sourceName, destType)
+function Uclass:VarTest(destType)
 		for k,v in pairs(Options) do
-		--print(k..(" test"))
 			if (string.find(destType, k) ~= nil) and Options[k] == true then
 				Debug("Uclass","VarTest",true)
 				return true
@@ -60,8 +60,6 @@ end
 
 function Uclass:KillCounterInc()
 	killCounter = killCounter + 1
-	offset = killCounter*22
-	InnerFrame:SetWidth(offset)
 	--Kills:SetText("Kills : "..killCounter)
 	if killCounter > 30 then
 		Uclass:KillCounterReset()
@@ -79,7 +77,13 @@ function Uclass:RowCounterReset()
 	--Row:SetText("Row : "..rowCounter)
 	--print("rowCounter :"..rowCounter)
 end
-
+function Uclass:PlayerDied(...)
+	killCounter = 0
+	rowCounter = 0
+	TimerCounter = 0
+	TimerRow = 0
+	PlaySoundFile("Interface\\AddOns\\Ucall\\Calls\\denied.ogg", "Master")
+end
 function Uclass:RowCounterInc()
 	rowCounter = rowCounter + 1
 	--Row:SetText("Row : "..rowCounter)
@@ -87,8 +91,12 @@ end
 
 function Uclass:SoundParser()
 	local allreadyPlay = false
+	if (killCounter == 10) then
+		PlaySoundFile("Interface\\AddOns\\Ucall\\Calls\\warpath.ogg", "Master")
+		allreadyPlay = true
+	end
 	for k, v in pairs(SoundsKill) do
-		if (SoundsKill[k] == killCounter) and (killCounter < 31 ) then
+		if (SoundsKill[k] == killCounter) and (killCounter < 31 ) and (allreadyPlay==false) then
 			PlaySoundFile("Interface\\AddOns\\Ucall\\Calls\\"..k..".ogg", "Master")
 			allreadyPlay = true
 		end

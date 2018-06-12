@@ -19,6 +19,7 @@ function Debug(module, name, varToTest)
         print("__",k,v)
       end
     else
+        print("type :",type(varToTest))
         print("var :",varToTest)
     end
 
@@ -29,9 +30,15 @@ function setContains(set, key)
     return set[key] ~= nil
 end
 
+function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
+
 function ResetGroupVar()
   local hasUI, isHunterPet = HasPetUI();
-  PlayersInGroup = GetHomePartyInfo()
+  local PlayersInGroup = GetHomePartyInfo()
   wipe(PlayersArray)
   PlayersArray ={
     [playerName] = PlayerEntity:new(playerName,UnitClass(playerName))
@@ -55,6 +62,26 @@ function ResetGroupVar()
   end
 end
 
+function getPlayersInGroup()
+  local returnGroup = {}
+  PlayersInGroup = GetHomePartyInfo()
+  if PlayersInGroup == nil then return {} end
+
+  for k,v in pairs(PlayersInGroup) do
+    returnGroup[k]={
+      Counter = 0,
+      Bfa_Name= "Bfa_"..k
+    }
+  end
+
+  return returnGroup
+end
+
+function ReturnUcall_Name(sourceName,Group)
+  for k,v in pairs(Group) do
+    if sourceName == k then return Group[k]["Ucall_Name"] end
+  end
+end
 --Usefull function to parse the Combat log event--
 function CombatEventParser(...)
   local EventParsed ={}
