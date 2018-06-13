@@ -3,8 +3,7 @@
 ## SavedVariables: Options
 
 tools.lua
-UcallSlash.lua
-UnrealCalls.lua
-PlayerEntity.lua
 FrameController.lua
+UnrealCalls.lua
+UcallSlash.lua
 Controller.lua

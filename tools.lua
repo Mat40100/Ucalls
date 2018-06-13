@@ -36,51 +36,59 @@ function tablelength(T)
   return count
 end
 
-function ResetGroupVar()
-  local hasUI, isHunterPet = HasPetUI();
-  local PlayersInGroup = GetHomePartyInfo()
-  wipe(PlayersArray)
-  PlayersArray ={
-    [playerName] = PlayerEntity:new(playerName,UnitClass(playerName))
-  }
-  if HasPetSpells(UnitName("pet")) ~= nil then
-    petName = UnitName("pet")
-    PlayersArray ={
-      [playerName] = PlayerEntity:new(playerName,UnitClass(playerName)),
-      [petName] = PlayerEntity:new(petName,"Pet")
-    }
-  else
-    PlayersArray ={
-      [playerName] = PlayerEntity:new(playerName,UnitClass(playerName))
-    }
-  end
-  if PlayersInGroup ~= nil then
-    for k,v in pairs(PlayersInGroup) do
-      print(k,v)
-      table.insert(PlayersArray,PlayerEntity:new(v,UnitClass(v)))
+function getPlayersInGroup(UcallGroup)
+  local InstantGroup= GetHomePartyInfo()
+  if InstantGroup ~= nil then
+    for Index,Name in pairs(InstantGroup) do
+      if setContains(UcallGroup, Name) == false then
+        UcallGroup[Name] ={
+    			Counter = 2,
+    			frame = nil
+    		}
+        UpdateInProgress = true
+      end
     end
   end
+
+  return UcallGroup
 end
 
-function getPlayersInGroup()
-  local returnGroup = {}
-  PlayersInGroup = GetHomePartyInfo()
-  if PlayersInGroup == nil then return {} end
-
-  for k,v in pairs(PlayersInGroup) do
-    returnGroup[k]={
-      Counter = 0,
-      Bfa_Name= "Bfa_"..k
-    }
+function UpdatePlayerInGroup(pName, UcallGroup)
+  local InstantGroup= GetHomePartyInfo()
+  --Si groupe vide
+  if InstantGroup == nil then
+    for k,v in pairs(UcallGroup) do
+      --Debug("Controller","Table vide","")
+     if (pName ~= k)  then
+       UcallGroup = PlayerFrameHide(UcallGroup,k)
+       UcallGroup[k]=nil
+       UpdateInProgress = true
+     end
+    end
+  elseif InstantGroup ~= nil then
+    for Name,table in pairs(UcallGroup) do
+      Debug("Controller","Maj table","")
+        if setContains(InstantGroup, Name) == nil then
+          UcallGroup[Name]=nil
+          UpdateInProgress = true
+        end
+    end
   end
-
-  return returnGroup
-end
-
-function ReturnUcall_Name(sourceName,Group)
-  for k,v in pairs(Group) do
-    if sourceName == k then return Group[k]["Ucall_Name"] end
+  -- Si joureur présent dans InstantGroup mais pas dans UcallGroup
+  if InstantGroup ~= nil then
+    for Name,table in pairs(UcallGroup) do
+      for Index,Name in pairs(InstantGroup) do
+        if setContains(UcallGroup, Name) == false then
+          UcallGroup[Name] ={
+            Counter = 2,
+            frame = nil
+          }
+          UpdateInProgress = true
+        end
+      end
+    end
   end
+  return UcallGroup
 end
 --Usefull function to parse the Combat log event--
 function CombatEventParser(...)
@@ -138,57 +146,4 @@ function CombatEventParser(...)
   end
 
   return EventParsed
-end
-
-function ThrowOptions()
-	print("==== Options =====")
-	for k,v in pairs(Options) do
-		print(k,Options[k])
-	end
-	print("================")
-end
-
-function setOption(option)
-  -- Invert the option thrown in this function --
-	if Options[option] then
-		Options[option] = false
-	else
-		Options[option] = true
-	end
-	print(option, Options[option])
-end
-
-function ChangeOption(option)
-  -- Check first if someone is tryng to change CallTimer via this way --
-  Debug("Tools","Change option is called ", true)
-
-	local exists = false
-	if option == "CallTimer" or option == "Debug" then
-	else
-		for k,v in pairs(Options) do
-			if k == option then
-			exists = true
-			end
-		end
-	end
-	if exists == true then
-		Debug("Tools","Option exist",true)
-	  setOption(option)
-		return true
-	elseif exists == false then
-		return false
-	end
-end
-
-function ChangeDebugger(string)
-  if type(string) == "string" then
-    if tContains(Modules,string) then
-      Options["Debug"] = string
-      return true
-    else
-      return false
-    end
-  else
-    return false
-  end
 end

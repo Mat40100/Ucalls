@@ -1,66 +1,70 @@
 local CombatLogHandlers = {}
+local CombatFrame = CreateFrame("Frame")
+
 local PlayerLogHandlers = {}
 local PlayerFrame = CreateFrame("Frame")
-local CombatFrame = CreateFrame("Frame")
+
+
 local RefreshFrame = CreateFrame("Frame")
+local RefreshTime = 1
+local Delta = 0
 
-	local RefreshTime = 1
-	local Delta = 0
-	local Group = {}
-	local GroupSize = 0
+local UcallGroup = {}
+local UcallGroupSize = 0
+local MainUiIsLoaded = false
+UpdateInProgress = false
+MainUi = nil
 
-	Options ={
-		Calls = true,
-		Creature = true,
-		Player = true,
-		CallTimer = 13,
-		Debug = "Parser"
-	}
-	petName = nil
+Options ={
+	Calls = true,
+	Creature = true,
+	Player = true,
+	CallTimer = 13,
+	Debug = "all"
+}
 
-	PlayerFrames = {
-
-	}
-
-	Modules ={
-		"all",
-		"none",
-		"Controller",
-		"Parser",
-		"Tools",
-		"Uclass",
-		"EventParser",
-		"Entity",
-		"Dpsmeter",
-		"Ucall_Kills"
-	}
+Modules ={
+	"all",
+	"none",
+	"Controller",
+	"Parser",
+	"Tools",
+	"Uclass",
+	"EventParser",
+	"Entity",
+	"Dpsmeter",
+	"Ucall_Kills"
+}
 
 function PlayerLogHandlers:PLAYER_ENTERING_WORLD(...)
 	local GroupSize = 0
 
-	playerName = UnitName("player")
-	--Send Message to guild to add him in array, and get return --
+	UcallPlayerName = UnitName("player")
 
+	--Verifie que le joueur n'existe pas dans la table (pour les changement d'instance par exemple)--
 
-	-- Add Player Array to Group array --
-	UcallGroup = getPlayersInGroup()
-
-	UcallGroup[playerName] = {
-		Ucall_Name="Ucall_"..playerName,
-		frame = nil
-	}
-
-	GroupSize = tablelength(UcallGroup)
-	Debug("Ucall_Kills","Group size",GroupSize)
-	Debug("Ucall_Kills","player's table",UcallGroup[playerName])
-
-	LoadMainFrame(GroupSize)
-	for k,v in pairs(UcallGroup) do
-		local f = CreatePlayerFrame(UcallGroup[k]["Ucall_Name"])
-		UcallGroup[k]["frame"] = f
+	if setContains(UcallGroup,playerName) == false then
+		UcallGroup[UcallPlayerName] = {
+			Counter = 0,
+			frame = nil
+		}
+		UpdateInProgress = true
 	end
-	FrameResize(Uclass:GetKillCounter(),playerName,UcallGroup)
---	PlayerFrames[playerName]["frame"]:SetWidth(100)
+
+	UcallGroup = getPlayersInGroup(UcallGroup)
+	UcallGroupSize = tablelength(UcallGroup)
+
+	if MainUiIsLoaded then
+		MainFrameResize(UcallGroupSize)
+	else
+		MainUi = LoadMainFrame(UcallGroupSize)
+		MainUiIsLoaded = true
+	end
+
+
+	UcallGroup = LoadGroupFrames(UcallGroup,UcallGroupSize)
+
+	Debug("Controller","Main debugger",UcallGroup)
 end
 
 function PlayerLogHandlers:PLAYER_REGEN_DISABLED(...)
@@ -73,34 +77,25 @@ function PlayerLogHandlers:PLAYER_REGEN_ENABLED(...)
 	Debug("Controller","Combat","End")
 end
 
+function PlayerLogHandlers:GROUP_ROSTER_UPDATE(...)
+	UcallGroup = UpdatePlayerInGroup(UcallPlayerName,UcallGroup)
+	UcallGroupSize = tablelength(UcallGroup)
+	Debug("Controller","Group Update",UcallGroup)
+	Debug("Controller","Group Size",UcallGroupSize)
+	MainUi = MainFrameResize(MainUi, UcallGroupSize)
+	LoadGroupFrames(UcallGroup,UcallGroupSize)
+end
+
 function CombatLogHandlers.COMBAT_LOG_EVENT_UNFILTERED(...)
 	local eventParsed= CombatEventParser(...)
-	local Ucall_Name = nil
-	local Counter = 0
-
-	if (eventParsed["type"] == "PARTY_KILL") and (eventParsed["sourceName"] == playerName) then
-		Debug("Uclass","Party_kill event",true)
-		Uclass:Call(eventParsed)
-		Counter = Uclass:GetKillCounter()
-		Debug("Ucall_Kills","Return Counter test",Counter)
-		FrameResize(Counter,playerName,UcallGroup)
-	end
+		if (eventParsed["type"] == "PARTY_KILL") and (eventParsed["sourceName"] == UcallPlayerName) then
+			Debug("Uclass","Party_kill event",true)
+			Uclass:Call(eventParsed)
+			UcallGroup[UcallPlayerName]["Counter"] = Uclass:GetKillCounter()
+			Debug("Uclass","Return Counter test",UcallGroup[UcallPlayerName]["Counter"])
+			UcallGroup = PlayerFrameResize(UcallPlayerName,UcallGroup)
+		end
 end
-
-function CombatLogHandlers.PLAYER_DEAD(...)
-	local Counter = 0
-	Uclass:PlayerDied()
-	FrameResize(0,playerName,UcallGroup)
-end
-
-function OnUpdate(elapsed)
-	Delta = Delta + elapsed
-	if (Delta > RefreshTime) then
-		Uclass:Timer()
-		Delta = 0
-	end
-end
-
 -- HANDLERS --
 for event , _ in pairs ( CombatLogHandlers ) do
 	CombatFrame : RegisterEvent ( event )
@@ -119,5 +114,5 @@ PlayerFrame : SetScript ("OnEvent", function ( self , event , ...)
 end)
 
 RefreshFrame:SetScript("OnUpdate",function (self, elapsed)
-	OnUpdate(elapsed)
+	--OnUpdate(elapsed)
 end)
